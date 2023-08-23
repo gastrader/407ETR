@@ -30,7 +30,7 @@ func NewDataReceiver() (*DataReceiver, error){
 	var (
 		p DataProducer
 		err error
-		kafkaTopic = "obuData"
+		kafkaTopic = "obudata"
 	)
 	p, err = NewKafkaProducer(kafkaTopic)
 	if err != nil {

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	// "fmt"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/gastrader/407ETR/types"
@@ -10,15 +9,14 @@ import (
 
 type DataProducer interface {
 	ProduceData(types.OBUData) error
-
 }
 
 type KafkaProducer struct {
 	producer *kafka.Producer
-	topic string
+	topic    string
 }
 
-func NewKafkaProducer(topic string) (DataProducer,error){
+func NewKafkaProducer(topic string) (DataProducer, error) {
 	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
 	if err != nil {
 		return nil, err
@@ -38,11 +36,11 @@ func NewKafkaProducer(topic string) (DataProducer,error){
 	}()
 	return &KafkaProducer{
 		producer: p,
-		topic: topic,
-	},nil
+		topic:    topic,
+	}, nil
 }
 
-func (p *KafkaProducer) ProduceData(data types.OBUData) error{
+func (p *KafkaProducer) ProduceData(data types.OBUData) error {
 	b, err := json.Marshal(data)
 	if err != nil {
 		return err
@@ -50,7 +48,9 @@ func (p *KafkaProducer) ProduceData(data types.OBUData) error{
 	return p.producer.Produce(&kafka.Message{
 		TopicPartition: kafka.TopicPartition{
 			Topic:     &p.topic,
-			Partition: kafka.PartitionAny},
+			Partition: kafka.PartitionAny,
+		},
+
 		Value: b,
 	}, nil)
 }
