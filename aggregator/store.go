@@ -1,6 +1,10 @@
 package main
 
-import "github.com/gastrader/407ETR/types"
+import (
+	"fmt"
+
+	"github.com/gastrader/407ETR/types"
+)
 
 type MemoryStore struct {
 	data map[int]float64
@@ -17,3 +21,10 @@ func (m *MemoryStore) Insert(d types.Distance) error {
 	return nil
 }
 
+func (m *MemoryStore) Get(id int) (float64, error) {
+	dist, ok := m.data[id]
+	if !ok {
+		return 0.0, fmt.Errorf("could not find distance for obu ID %d", id)
+	}
+	return dist, nil
+}

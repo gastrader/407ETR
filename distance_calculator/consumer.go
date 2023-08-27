@@ -2,8 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"log"
+	"time"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/gastrader/407ETR/aggregator/client"
 	"github.com/gastrader/407ETR/types"
 	"github.com/mattn/go-colorable"
 	"github.com/sirupsen/logrus"
@@ -14,13 +17,15 @@ type KafkaConsumer struct {
 	consumer  *kafka.Consumer
 	isRunning bool
 	calcService CalculatorServicer
+	aggClient *client.HTTPClient
 }
 
-func NewKafkaConsumer(topic string, svc CalculatorServicer) (*KafkaConsumer, error) {
+func NewKafkaConsumer(topic string, svc CalculatorServicer, aggClient *client.HTTPClient) (*KafkaConsumer, error) {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": "localhost",
 		"group.id":          "myGroup",
 		"auto.offset.reset": "earliest",
+
 	})
 	if err != nil {
 		return nil, err
@@ -30,6 +35,7 @@ func NewKafkaConsumer(topic string, svc CalculatorServicer) (*KafkaConsumer, err
 	return &KafkaConsumer{
 		consumer: c,
 		calcService: svc,
+		aggClient: aggClient,
 	}, nil
 }
 
@@ -58,7 +64,15 @@ func (c *KafkaConsumer) readMessageLoop() {
 			logrus.Errorf("Calculation error %s", err)
 			continue
 		}
-		_ = distance
+		req := types.Distance{
+			Value: distance,
+			Unix: time.Now().UnixNano(),
+			OBUID: data.OBUID,
+		}
+		if err := c.aggClient.AggregateInvoice(req); err != nil {
+			log.Fatal(err)
+			continue
+		}
 	}
 }
 
