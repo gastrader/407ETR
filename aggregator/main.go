@@ -71,7 +71,7 @@ func handleGetInvoice(svc Aggregator) http.HandlerFunc {
 		}
 		invoice, err := svc.CalculateInvoice(obuID)
 		if err != nil {
-			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"Error": err.Error()})
 			return
 		}
 		writeJSON(w, http.StatusOK, invoice)
@@ -83,11 +83,11 @@ func handleAggregate(svc Aggregator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var distance types.Distance
 		if err := json.NewDecoder(r.Body).Decode(&distance); err != nil {
-			writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+			writeJSON(w, http.StatusBadRequest, map[string]string{"ERrror": err.Error()})
 			return
 		}
 		if err := svc.AggregateDistance(distance); err != nil {
-			writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			writeJSON(w, http.StatusInternalServerError, map[string]string{"Error": err.Error()})
 		}
 	}
 }
