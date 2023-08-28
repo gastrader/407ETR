@@ -11,10 +11,10 @@ type DistanceCalculator struct {
 
 const (
 	kafkaTopic = "obudata"
-	aggregatorEndpoint = "http://127.0.0.1:3000/aggregate"
+	aggregatorEndpoint = "127.0.0.1:3000/aggregate"
 )
 
-//Transport could be HHTP, GRPC, KAFKA -> attach business logic to transport.
+
 
 func main() {
 	var (
@@ -23,7 +23,14 @@ func main() {
 	)
 	svc = NewCalculatorService()
 	svc = NewLogMiddleware(svc)
-	kafkaConsumer, err := NewKafkaConsumer(kafkaTopic, svc, client.NewClient(aggregatorEndpoint))
+
+	// httpClient := client.NewHTTPClient(aggregatorEndpoint)
+	grpcClient, err := client.NewGRPCClient(aggregatorEndpoint)
+	if err != nil{
+		log.Fatal(err)
+	}
+
+	kafkaConsumer, err := NewKafkaConsumer(kafkaTopic, svc, grpcClient)
 	if err != nil {
 		log.Fatal(err)
 	}

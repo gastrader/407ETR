@@ -3,3 +3,7 @@
 ```
 docker compose up -d
 ```
+
+```
+PATH="${PATH}:${HOME}/go/bin"
+```

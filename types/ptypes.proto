@@ -4,7 +4,7 @@ option go_package = "github.com/gastrader/407ETR/types";
 
 
 service Aggregator {
-rpc Aggregate(AggregateRequest) returns (None);
+    rpc Aggregate(AggregateRequest) returns (None);
 }
 
 message None {}
@@ -13,5 +13,10 @@ message AggregateRequest {
     int32 ObuID = 1;
     double Value = 2;
     int64 Unix = 3;
+
+}
+
+message GetInvoiceRequest {
+    int32 ObuID = 1;
 
 }

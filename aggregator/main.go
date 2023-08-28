@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	// "context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -9,16 +9,16 @@ import (
 	"net"
 	"net/http"
 	"strconv"
-	"time"
+	// "time"
 
-	"github.com/gastrader/407ETR/aggregator/client"
+	// "github.com/gastrader/407ETR/aggregator/client"
 	"github.com/gastrader/407ETR/types"
 	"google.golang.org/grpc"
 )
 
 func main() {
 	httpLlistenAddr := flag.String("httpAddr", ":3000", "listen address of HTTP server")
-	grpcLlistenAddr := flag.String("grpcAddr", ":3001", "listen address of GRPC server")
+	grpcLlistenAddr := flag.String("grpcAddr", "localhost:3001", "listen address of GRPC server")
 
 	flag.Parse()
 
@@ -28,34 +28,24 @@ func main() {
 	)
 	svc = NewInvoiceAggregator(store)
 	svc = NewLogMiddleware(svc)
-	go makeGRPCTransport(*grpcLlistenAddr, svc)
-	time.Sleep(time.Second * 5)
-	c, err := client.NewGRPCClient(*grpcLlistenAddr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	if _, err := c.Aggregate(context.Background(), &types.AggregateRequest{
-		ObuID: 1,
-		Value: 32,
-		Unix: time.Now().UnixNano(),
-	}); err != nil {
-		log.Fatal(err)
-	}
-	makeHTTPTransport(*httpLlistenAddr, svc)
+	go func() {
+		log.Fatal(makeGRPCTransport(*grpcLlistenAddr, svc))
+	}()
+	log.Fatal(makeHTTPTransport(*httpLlistenAddr, svc))
 
 }
 
-func makeHTTPTransport(listenAddr string, svc Aggregator) {
+func makeHTTPTransport(listenAddr string, svc Aggregator) error {
 	fmt.Println("HTTP transport running on port ", listenAddr)
 	http.HandleFunc("/aggregate", handleAggregate(svc))
 	http.HandleFunc("/invoice", handleGetInvoice(svc))
-	log.Fatal(http.ListenAndServe(listenAddr, nil))
+	return http.ListenAndServe(listenAddr, nil)
 }
 
-func makeGRPCTransport(listenAddr string, svc Aggregator) error{
+func makeGRPCTransport(listenAddr string, svc Aggregator) error {
 	fmt.Println("gRPC trasnport running on port: ", listenAddr)
 	// Make TCP Listener
-	ln, err := net.Listen("TCP", listenAddr)
+	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		return err
 	}
@@ -85,7 +75,7 @@ func handleGetInvoice(svc Aggregator) http.HandlerFunc {
 			return
 		}
 		writeJSON(w, http.StatusOK, invoice)
-		
+
 	}
 }
 
