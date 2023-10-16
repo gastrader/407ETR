@@ -1,9 +1,3 @@
-#407ETR TOLL CALCULATOR
+# 407ETR TOLL CALCULATOR
 
-```
-docker compose up -d
-```
-
-```
-PATH="${PATH}:${HOME}/go/bin"
-```
+A comprehensive toll highway billing system developed in Go, leveraging Apache Kafka for driver simulation. Features a suite of microservices (gRPC), including a dedicated invoice service, complemented by a user-centric gateway API.
